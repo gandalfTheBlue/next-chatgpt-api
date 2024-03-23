@@ -5,35 +5,6 @@ import { EnvKey, GetEnv } from '../utils'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest): Promise<Response> {
-  const { searchParams } = request.nextUrl
-  const content = searchParams.get('content')
-
-  const openai = new OpenAI({
-    apiKey: GetEnv(EnvKey.openAiApiKey),
-  })
-
-  if (!content) {
-    return new Response('No content provided', { status: 400 })
-  }
-
-  const completion = await openai.chat.completions.create({
-    messages: [
-      {
-        role: 'user',
-        content: content,
-      },
-    ],
-    model: 'gpt-3.5-turbo',
-  })
-
-  if (!completion || !completion.choices || !completion.choices[0]) {
-    return new Response('No completion found', { status: 500 })
-  }
-
-  return Response.json({ data: completion.choices[0].message.content })
-}
-
 export async function POST(request: NextRequest): Promise<Response> {
   const { messages } = await request.json()
 
@@ -48,6 +19,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   const completion = await openai.chat.completions.create({
     messages,
     model: 'gpt-3.5-turbo',
+    max_tokens: 70,
   })
 
   if (!completion || !completion.choices || !completion.choices[0]) {
